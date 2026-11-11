@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบบริหารจัดการเครือข่ายชุมชน</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f7f4;--card:#fff;--tx:#111;--mut:#44534a;--bd:#c9d4ca;--g:#1b5e20;--lg:#e8f5e9;--in:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a14;--card:#1c261f;--tx:#e8f0e9;--mut:#9fb0a2;--bd:#2f3d32;--g:#66bb6a;--lg:#243428;--in:#17201a}}
+:root[data-theme="dark"]{--bg:#121a14;--card:#1c261f;--tx:#e8f0e9;--mut:#9fb0a2;--bd:#2f3d32;--g:#66bb6a;--lg:#243428;--in:#17201a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Tahoma,"Noto Sans Thai",sans-serif;font-size:19px;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+h1{font-size:26px;color:var(--g);margin:6px 0 10px}
+nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+nav button{white-space:nowrap;border:2px solid var(--bd);background:var(--card);color:var(--tx);border-radius:24px;padding:12px 20px;font:inherit;font-size:18px;font-weight:bold;cursor:pointer}
+nav button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;text-align:center}
+.kpi b{display:block;font-size:36px;color:var(--g)}.kpi span{color:var(--tx);font-size:18px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:12px 0}
+.box h2{font-size:21px;margin:0 0 8px;color:var(--g)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;align-items:end}
+label{font-size:17px;font-weight:bold;color:var(--tx);display:block;margin-bottom:4px}
+form>div{min-width:0}input[type=date]{-webkit-appearance:none;appearance:none;min-height:40px;min-width:0}
+input,select{width:100%;max-width:100%;padding:13px;min-height:50px;border:2px solid var(--mut);border-radius:8px;background:var(--in);color:var(--tx);font:inherit}
+.btn{background:var(--g);color:#fff;border:0;border-radius:10px;padding:14px 22px;min-height:50px;font:inherit;font-weight:bold;cursor:pointer}
+.btn.s{background:transparent;color:var(--tx);border:2px solid var(--mut);padding:10px 16px;min-height:44px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:18px}
+th{background:var(--g);color:#fff;padding:12px;text-align:left;white-space:nowrap}
+td{padding:12px;border-bottom:1px solid var(--bd);white-space:nowrap}
+td input,td select{min-width:110px;padding:10px}td input[type=number]{min-width:100px}td input[type=date]{min-width:170px}
+.em{color:var(--mut);text-align:center;padding:16px}
+.leg{display:flex;flex-wrap:wrap;gap:10px;font-size:17px;margin-top:8px}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+.note{font-size:15px;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>🌿 ระบบบริหารจัดการเครือข่ายชุมชน</h1>
+<nav id="nav"></nav>
+<main id="main"></main>
+<p class="note">ข้อมูลเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่แชร์ข้ามเครื่อง</p>
+</div>
+<script>
+var FR=["เงาะ","ทุเรียน","ลำไย","มังคุด"],ST=["มีอยู่","พร้อมขาย","ขายแล้ว","ส่งมอบแล้ว"],OS=["รอดำเนินการ","กำลังเตรียม","ส่งมอบแล้ว"],FT=["รายรับ","รายจ่าย"];
+var S={
+h:{t:"1. ครัวเรือน",p:"H",c:[["id","รหัส","t"],["name","ชื่อ-สกุล","t"],["area","หมู่บ้าน/ซอย","t"],["tel","เบอร์โทร","t"],["mem","สมาชิก (คน)","n"],["grp","กลุ่มอาชีพ","t"]]},
+p:{t:"2. ผลผลิต",p:"P",c:[["id","รหัส","t"],["date","วันที่","d"],["hh","รหัสครัวเรือน","t"],["item","ผลผลิต","s",FR],["qty","ปริมาณ (กก.)","n"],["st","สถานะ","s",ST],["price","ราคา/กก.","n"],["val","มูลค่า (บาท)","f",function(r){return r.qty*r.price}]]},
+m:{t:"3. ตลาด",p:"S",c:[["id","รหัสการขาย","t"],["date","วันที่ขาย","d"],["item","ผลผลิต","s",FR],["buyer","ผู้ซื้อ/ช่องทาง","t"],["qty","ปริมาณ (กก.)","n"],["price","ราคา/กก.","n"],["tot","ยอดขาย (บาท)","f",function(r){return r.qty*r.price}]]},
+o:{t:"4. คำสั่งซื้อ",p:"O",c:[["id","เลขที่","t"],["date","วันที่สั่ง","d"],["cust","ลูกค้า","t"],["item","สินค้า","s",FR],["qty","ปริมาณ (กก.)","n"],["price","ราคา/กก.","n"],["tot","ยอดรวม (บาท)","f",function(r){return r.qty*r.price}],["due","วันส่งมอบ","d"],["st","สถานะ","s",OS]]},
+f:{t:"5. การเงิน",p:"F",c:[["date","วันที่","d"],["type","ประเภท","s",FT],["desc","รายการ","t"],["amt","จำนวนเงิน (บาท)","n"]]},
+n:{t:"6. ข่าวสาร",p:"N",c:[["date","วันที่","d"],["title","หัวข้อ","t"],["body","รายละเอียด","t"],["by","ผู้ประกาศ","t"]]}
+};
+var KEY="community-system-v1",D,tab="dash";
+function seed(){return{h:[{id:"H001",name:"สมชาย ใจดี",area:"หมู่ 1",tel:"081-234-5678",mem:4,grp:"กลุ่มผลไม้"}],
+p:[{id:"P001",date:"2026-11-01",hh:"H001",item:"ทุเรียน",qty:420,st:"พร้อมขาย",price:120}],
+m:[{id:"S001",date:"2026-11-05",item:"ทุเรียน",buyer:"ตลาดนัดชุมชน",qty:100,price:120}],
+o:[{id:"O001",date:"2026-11-08",cust:"ร้านอาหารสุขใจ",item:"ลำไย",qty:50,price:35,due:"2026-11-12",st:"รอดำเนินการ"}],
+f:[{date:"2026-11-06",type:"รายจ่าย",desc:"ค่าบรรจุภัณฑ์",amt:500}],
+n:[{date:"2026-11-10",title:"ประชุมกลุ่มประจำเดือน",body:"ศาลาประชาคม 09.00 น.",by:"ประธานกลุ่ม"}]}}
+function load(){try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s)}catch(e){}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+D=load();
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fd(s){if(!s)return"";var a=s.split("-");return a.length==3?a[2]+"/"+a[1]+"/"+a[0]:s}
+function nf(n){return Number(n||0).toLocaleString("th-TH",{maximumFractionDigits:2})}
+function sum(a,f){return a.reduce(function(t,r){return t+(f(r)||0)},0)}
+function nav(){document.getElementById("nav").innerHTML='<button class="'+(tab=="dash"?"on":"")+'" data-t="dash">หน้าหลัก</button>'+Object.keys(S).map(function(k){return'<button class="'+(tab==k?"on":"")+'" data-t="'+k+'">'+S[k].t+'</button>'}).join("")}
+function fin(){var mk=sum(D.m,function(r){return r.qty*r.price}),od=sum(D.o,function(r){return r.st=="ส่งมอบแล้ว"?r.qty*r.price:0}),oi=sum(D.f,function(r){return r.type=="รายรับ"?+r.amt:0}),ex=sum(D.f,function(r){return r.type=="รายจ่าย"?+r.amt:0});return{mk:mk,od:od,oi:oi,ex:ex,sales:mk+od,inc:mk+od+oi,bal:mk+od+oi-ex}}
+function fsum(){var x=fin(),R=[["รายรับจากตลาด (แท็บ 3)",x.mk],["รายรับจากคำสั่งซื้อที่ส่งมอบแล้ว (แท็บ 4)",x.od],["รายรับอื่น (กรอกเองด้านล่าง)",x.oi],["รายจ่าย (กรอกเองด้านล่าง)",-x.ex],["เงินคงเหลือ",x.bal]];return'<div class="box"><h2>สรุปการเงิน (คำนวณอัตโนมัติ)</h2><table>'+R.map(function(r,i){return'<tr'+(i==4?' style="font-weight:bold"':'')+'><td>'+r[0]+'</td><td>'+nf(r[1])+'</td></tr>'}).join("")+'</table><p class="note">รายรับจากตลาดและคำสั่งซื้อที่ส่งมอบแล้วนับให้เอง ไม่ต้องกรอกซ้ำด้านล่าง กรอกเฉพาะรายจ่ายและรายรับอื่น ๆ</p></div>'}
+function dash(){
+var inc=fin().inc,exp=sum(D.f,function(r){return r.type=="รายจ่าย"?+r.amt:0});
+var K=[["ครัวเรือน",D.h.length],["รายการผลผลิต",D.p.length],["รายการขาย",D.m.length],["ยอดขายสะสม (บาท)",nf(fin().sales)],["รายรับ (บาท)",nf(inc)],["เงินคงเหลือ (บาท)",nf(inc-exp)]];
+var rd=FR.map(function(f){return sum(D.p,function(r){return r.item==f&&r.st=="พร้อมขาย"?+r.qty:0})});
+var mx=Math.max.apply(null,rd.concat([1])),bars=rd.map(function(v,i){var h=v/mx*120,x=20+i*75;return'<rect x="'+x+'" y="'+(150-h)+'" width="50" height="'+h+'" rx="4" fill="#f4b942"/><text x="'+(x+25)+'" y="'+(144-h)+'" text-anchor="middle" font-size="15" fill="currentColor">'+nf(v)+'</text><text x="'+(x+25)+'" y="170" text-anchor="middle" font-size="16" fill="currentColor">'+FR[i]+'</text>'}).join("");
+var cs=ST.map(function(s){return D.p.filter(function(r){return r.st==s}).length}),tot=cs.reduce(function(a,b){return a+b},0),col=["#2e7d32","#f4b942","#90a4ae","#ab47bc"],off=0,arcs="";
+cs.forEach(function(c,i){if(!c)return;var p=c/tot*100;arcs+='<circle r="15.9" cx="21" cy="21" fill="none" stroke="'+col[i]+'" stroke-width="6" stroke-dasharray="'+p+' '+(100-p)+'" stroke-dashoffset="'+(25-off)+'"/>';off+=p});
+var rp=tot?Math.round(cs[1]/tot*100):0;
+var os=OS.map(function(s){return'<tr><td>'+s+'</td><td>'+D.o.filter(function(r){return r.st==s}).length+'</td></tr>'}).join("");
+return'<div class="grid">'+K.map(function(k){return'<div class="kpi"><b>'+k[1]+'</b><span>'+k[0]+'</span></div>'}).join("")+'</div><div class="two"><div class="box"><h2>สรุปผลผลิตที่พร้อมขาย (กก.)</h2><svg viewBox="0 0 320 180" width="100%">'+bars+'</svg></div><div class="box"><h2>สถานะผลผลิต</h2><svg viewBox="0 0 42 42" width="190" style="display:block;margin:auto"><circle r="15.9" cx="21" cy="21" fill="none" stroke="var(--bd)" stroke-width="6"/>'+arcs+'<text x="21" y="23" text-anchor="middle" font-size="8" fill="currentColor">'+rp+'%</text></svg><div class="leg">'+ST.map(function(s,i){return'<span><i style="background:'+col[i]+'"></i>'+s+' ('+cs[i]+')</span>'}).join("")+'</div></div></div><div class="box"><h2>คำสั่งซื้อ</h2><table><tr><th>สถานะ</th><th>รายการ</th></tr>'+os+'</table></div><button class="btn s" id="reset">ล้างข้อมูลทั้งหมด</button>'}
+function ec(c,v,i){var a=' data-r="'+i+'" data-c="'+c[0]+'"';
+if(c[2]=="f")return'<td>'+nf(v)+'</td>';
+if(c[2]=="s")return'<td><select'+a+'>'+c[3].map(function(o){return'<option'+(o==v?' selected':'')+'>'+o+'</option>'}).join("")+'</select></td>';
+return'<td><input'+a+' type="'+(c[2]=="d"?"date":c[2]=="n"?"number":"text")+'" value="'+esc(v)+'"'+(c[2]=="n"?' step="any" min="0"':'')+'></td>'}
+function sheet(k){
+var s=S[k],rows=D[k],nx=s.p+String(rows.length+1).padStart(3,"0");
+var form=s.c.filter(function(c){return c[2]!="f"}).map(function(c){
+var h='<div><label>'+c[1]+'</label>';
+if(c[2]=="s")h+='<select name="'+c[0]+'">'+c[3].map(function(o){return'<option>'+o+'</option>'}).join("")+'</select>';
+else h+='<input name="'+c[0]+'" type="'+(c[2]=="d"?"date":c[2]=="n"?"number":"text")+'" '+(c[2]=="n"?'step="any" min="0"':"")+(c[0]=="id"?' value="'+nx+'"':"")+'>';
+return h+'</div>'}).join("");
+var th=s.c.map(function(c){return'<th>'+c[1]+'</th>'}).join("")+'<th></th>';
+var tb=rows.map(function(r,i){return'<tr>'+s.c.map(function(c){var v=c[2]=="f"?c[3](r):r[c[0]];return ec(c,v,i)}).join("")+'<td><button class="btn s" data-del="'+i+'">ลบ</button></td></tr>'}).join("");
+return(k=="f"?fsum():"")+'<div class="box"><h2>'+s.t+' — เพิ่มข้อมูล</h2><form id="f" data-k="'+k+'">'+form+'<button class="btn" type="submit">เพิ่ม</button></form></div><div class="box tw"><table><tr>'+th+'</tr>'+(tb||'<tr><td class="em" colspan="'+(s.c.length+1)+'">ยังไม่มีข้อมูล</td></tr>')+'</table></div>'}
+function render(){nav();document.getElementById("main").innerHTML=tab=="dash"?dash():sheet(tab)}
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset.t){tab=t.dataset.t;render();scrollTo(0,0)}
+else if(t.dataset.del!=null){D[tab].splice(+t.dataset.del,1);save();render()}
+else if(t.id=="reset"&&confirm("ลบข้อมูลทั้งหมด?")){D={h:[],p:[],m:[],o:[],f:[],n:[]};save();render()}});
+document.addEventListener("submit",function(e){e.preventDefault();var f=e.target,k=f.dataset.k,r={};
+S[k].c.forEach(function(c){if(c[2]=="f")return;var v=f.querySelector('[name="'+c[0]+'"]').value;r[c[0]]=c[2]=="n"?(+v||0):v});
+D[k].push(r);save();render()});
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.r!=null){var c=S[tab].c.filter(function(x){return x[0]==t.dataset.c})[0];D[tab][+t.dataset.r][c[0]]=c[2]=="n"?(+t.value||0):t.value;save();render()}});
+render();
+</script>
+</body>
+</html>
